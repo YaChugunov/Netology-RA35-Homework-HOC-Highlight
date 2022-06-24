@@ -62,45 +62,35 @@ function Video(props) {
 //
 // Обертка для функционального компонента DateTime, форматирующая дату к требуемому виду
 // Для дат старше более 10 дней сделал вывод в начальном формате
-function DateTimePretty(Component) {
+function Item(Component) {
   return class extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {
-        strTimestamp: null,
-      };
     }
-    // Начальный рендер
-    componentDidMount() {
-      let now = moment();
-      let initialTimestamp = moment(this.props.date);
-      let diffDays = now.diff(initialTimestamp, 'days');
-      let diffHours = now.diff(initialTimestamp, 'hours');
-      let strTimestamp = isValidDate(initialTimestamp)
-        ? diffDays > 10
-          ? initialTimestamp.format('DD.MM.YYYY H:mm:ss')
-          : diffDays > 1
-          ? diffDays + ' дн. назад'
-          : diffHours > 1
-          ? '5 часов назад'
-          : '12 минут назад'
-        : 'Неправильная дата';
-      console.log(strTimestamp);
-      this.setState({
-        strTimestamp: strTimestamp,
-      });
-    }
+    //
+    componentDidMount() {}
     componentDidUpdate() {}
     componentWillUnmount() {}
-
+    //
     render() {
-      // return <Component {...this.props} />;
-      return <Component date={this.state.strTimestamp} />;
+      let views = this.props.views;
+      if (views > 1000) {
+        return (
+          <Popular {...this.props} children={<Component {...this.props} />} />
+        );
+      } else if (views < 100) {
+        return <New {...this.props} children={<Component {...this.props} />} />;
+      } else {
+        return <Component {...this.props} />;
+      }
     }
   };
 }
+//
+//
 // Создаем компонент для вывода
-const WrappedDatetime = DateTimePretty(Video);
+const WrappedVideo = Item(Video);
+const WrappedArticle = Item(Article);
 //
 //
 
@@ -108,10 +98,10 @@ function List(props) {
   return props.list.map((item) => {
     switch (item.type) {
       case 'video':
-        return <Video {...item} />;
+        return <WrappedVideo {...item} />;
 
       case 'article':
-        return <Article {...item} />;
+        return <WrappedArticle {...item} />;
     }
   });
 }
@@ -126,7 +116,7 @@ export default function App() {
     {
       type: 'video',
       url: 'https://www.youtube.com/embed/dVkK36KOcqs?rel=0&amp;controls=0&amp;showinfo=0',
-      views: 12,
+      views: 228,
     },
     {
       type: 'article',
